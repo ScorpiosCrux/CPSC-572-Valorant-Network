@@ -1,3 +1,8 @@
+.DS_Store
+CPSC-572-WebScraping-VENV/
+chromedriver
+chromedriver_mac64_m1.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
