@@ -1,5 +1,7 @@
 # Webscraping Setup Environment
 
+- Clone this repo first
+
 ## VSCode Setup 
 Follow these steps closely as failing to do so make complicate things.
 - With VSCode Open CPSC-572-Valorant-Network/
