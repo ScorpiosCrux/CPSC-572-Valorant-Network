@@ -16,7 +16,7 @@ Follow these steps closely as failing to do so make complicate things.
 
 ### Creation:
 
-Create a folder and name it exactly `CPSC-572-Project-VENV` because .gitignore is configured to ignore this folder name.
+- Open the cloned dir and inside create a folder and name it exactly `CPSC-572-Project-VENV` because .gitignore is configured to ignore this folder name.
 `python3 -m venv /path/to/new/virtual/environment`
 
 ### Activation:
@@ -29,8 +29,8 @@ Create a folder and name it exactly `CPSC-572-Project-VENV` because .gitignore i
 
 ### Packages:
 
--   Format: package-name:version-number
--   `selenium:4.5.0`
+-   Format: package-name==version-number
+-   `selenium==4.5.0`
 
 ## Drivers:
 
@@ -44,6 +44,10 @@ Save the driver into your workspace.
 
 ### Running Chrome Driver:
 - For MacOS users, you might need to go to System Preferences - > Privacy & Security -> General Tab -> (Chrome Driver) Run Anyways
+
+
+## Running demo.py
+- There's a variable called `chrome_driver_path` that you need to replace with the path to where you put your chrome driver.
 
 
 

@@ -4,9 +4,9 @@ from selenium import webdriver
 
 import time
 
-chromeDriverPath = "/Users/vivid/Code/School/CPSC-572/CPSC-572-Valorant-Network/Webscraping/chromedriver"
+chrome_driver_path = "/Users/vivid/Code/School/CPSC-572/CPSC-572-Valorant-Network/Webscraping/chromedriver"
 
-service = Service(executable_path=chromeDriverPath)
+service = Service(executable_path=chrome_driver_path)
 driver = webdriver.Chrome(service=service)
 
 
