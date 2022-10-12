@@ -42,7 +42,7 @@ You want something that looks like `Version 105.0.5195.125`\
 Visit https://chromedriver.chromium.org/downloads and download the respective driver.\
 Save the driver into your workspace.
 
-## Running Chrome Driver:
+### Running Chrome Driver:
 - For MacOS users, you might need to go to System Preferences - > Privacy & Security -> General Tab -> (Chrome Driver) Run Anyways
 
 
