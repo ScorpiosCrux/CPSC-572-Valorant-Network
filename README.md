@@ -50,4 +50,12 @@ Save the driver into your workspace.
 - There's a variable called `chrome_driver_path` that you need to replace with the path to where you put your chrome driver.
 
 
+### XPATH
+```
+1 https://liquipedia.net/valorant/index.php?title=Category:Teams
+/html/body/div[3]/main/div/div[3]/div[3]/div[2]/div[2]/div/div/div[7]/ul/li[12]/a
+2 https://liquipedia.net/valorant/index.php?title=Category:Teams&pagefrom=Kafalar+Esports#mw-pages
+/html/body/div[3]/main/div/div[3]/div[3]/div[2]/div[2]/div/div/div[3]/ul/li[13]/a
+3 https://liquipedia.net/valorant/index.php?title=Category:Teams&pagefrom=Team+nxl#mw-pages
+/html/body/div[3]/main/div/div[3]/div[3]/div[2]/div[2]/div/div/div[1]/ul/li[6]/a```
 
