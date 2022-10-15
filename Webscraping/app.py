@@ -10,9 +10,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 chrome_options = Options()
 
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 
-chromeDriverPath = "/Users/vivid/Code/School/CPSC-572/CPSC-572-Valorant-Network/Webscraping/chromedriver"
+chromeDriverPath = "/Users/mar/Documents/SCHOOL/FALL2022/CPSC572/project/CPSC-572-Valorant-Network/chromedriver"
 
 service = Service(executable_path=chromeDriverPath)
 driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -84,7 +84,40 @@ def getTeamInfo(team_url):
     while(True):
         break
 
+def getTournaments():
 
+    page_urls = [
+                'https://liquipedia.net/valorant/S-Tier_Tournaments',
+                'https://liquipedia.net/valorant/A-Tier_Tournaments',
+                'https://liquipedia.net/valorant/B-Tier_Tournaments',
+                'https://liquipedia.net/valorant/C-Tier_Tournaments',
+                'https://liquipedia.net/valorant/Qualifier_Tournaments',
+                'https://liquipedia.net/valorant/Female_Tournaments'
+                ]
+
+    #year: 4 = 2022, 5 = 2021
+    #tournament: row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.
+    full_xpath = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[{year}]/div/div[{tournament}]/div[1]/b/a'
+    
+    #Nested dictionary to hold data 
+    tournaments = {
+        'tournament': {
+            'name': '',
+            'tier': '',
+            'participants': [],
+            'matches': [{
+                'team1': {
+                    'name': '',
+                    'members': []
+                },
+                'team2':{
+                    'name': '',
+                    'members': []
+                },
+                'winner': ''
+            }]
+        }
+    }
 
 
 def main():
