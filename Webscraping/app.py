@@ -91,8 +91,8 @@ def getTournaments():
                 'https://liquipedia.net/valorant/A-Tier_Tournaments',
                 'https://liquipedia.net/valorant/B-Tier_Tournaments',
                 'https://liquipedia.net/valorant/C-Tier_Tournaments',
-                'https://liquipedia.net/valorant/Qualifier_Tournaments',
-                'https://liquipedia.net/valorant/Female_Tournaments'
+                # 'https://liquipedia.net/valorant/Qualifier_Tournaments',
+                # 'https://liquipedia.net/valorant/Female_Tournaments'
                 ]
 
     #year: 4 = 2022, 5 = 2021
@@ -131,9 +131,14 @@ def getTournamentsAlgo(page_url,full_xpath):
     tournaments = {}
     tournament_name = ''                                                                                                                                            
     tournament_info = {}
-    year_iteration = 3                  #year:  4 = 2022, 5 = 2021  (for s-tier only)                                                                    
-    tournament_iteration = 2            #row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.                                                                           
+    tournament_iteration = 2 
 
+    #because the pages are structured differently, we must do an if statement :(
+    if page_url == 'https://liquipedia.net/valorant/C-Tier_Tournaments':
+        year_iteration = 4 
+    else:
+        year_iteration = 3                  #year:  4 = 2022, 5 = 2021  (for s-tier only)                                                                    
+    
     getURL(page_url)                                                    # Uses the driver to open the URL
     formatted_xpath = full_xpath.format(year=year_iteration, tournament=tournament_iteration)
     WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, formatted_xpath)))
@@ -151,7 +156,7 @@ def getTournamentsAlgo(page_url,full_xpath):
                 print(e.args[0])
                 break
             tournament_iteration += 1
-        # /html/body/div[3]/main/div/div[3]/div[3]/div/div[5]/div/div[2]/div[1]/b/a
+
         tournament_iteration = 2                                                                                            # Reset Team Index
         year_iteration += 1
 
