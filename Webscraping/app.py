@@ -1,6 +1,9 @@
+
+import pickle
 import time
 
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -79,17 +82,118 @@ def getTeamsAlgo(page_url, full_xpath):
     return team_names, team_links
         
 
+# Dumps a list in a file
+def serializeList(file_name, list):
+    with open(file_name, 'wb') as fp:
+        pickle.dump(list, fp)
 
-def getTeamInfo(team_url):
-    while(True):
-        break
+def readList(file_name):
+    with open (file_name, 'rb') as fp:
+        itemlist = pickle.load(fp)
+    return itemlist
+
+
+
+def getTeamInfo(team_link):
+
+    print("Working on: " + team_link)
+    getURL(team_link)
+    wait = WebDriverWait(driver, 1)
+
+
+    data = {}
+
+    # Team Name
+    try:
+        res = wait.until(EC.presence_of_element_located((By.XPATH, "//h1/span")))
+        team_name = res.text
+        data["team-name"] = team_name
+    except TimeoutException as e:
+        print("\n Unable to locate team_name! \n")
+
+    # Country
+    try:
+        # Find element div tag with Location as text. Then get it's sibling which is a div
+        res = driver.find_element(By.XPATH, '//div[text()="Location:"]/following-sibling::div')
+        country = res.text.strip()
+        data["country"] = country
+    except NoSuchElementException:
+        data["country"] = ""
+        print("\n Unable to locate country! \n")
+
+    # Region
+    try:
+        res = driver.find_element(By.XPATH, '//div[text()="Region:"]/following-sibling::div')
+        region = res.text.strip()
+        data["region"] = region
+    except NoSuchElementException:
+        data["region"] = ""
+        print("\n Unable to locate region! \n")
+    
+    # Winnings
+    try:
+        res = driver.find_element(By.XPATH, '//div[text()="Approx. Total Winnings:"]/following-sibling::div')
+        winnings = res.text.strip()
+        data["winnings"] = winnings
+    except NoSuchElementException:
+        data["winnings"] = ""
+        print("\n Unable to locate winnings! \n")
+
+    # Status
+    try:
+        res = driver.find_element(By.XPATH, '//div[text()="Disbanded"]/following-sibling::div')
+        data["status"] = "disbanded"
+    except NoSuchElementException:
+        data["status"] = "active"
+
+
+    # Click on show all button, need to execute script because button is not visible for click
+    try:
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, '//h3/span[@id="Former"]//parent::h3//following-sibling::div/ul/li[@class="show-all"]/a[text()="Show All"]')))
+        res = driver.find_element(By.XPATH, '//h3/span[@id="Former"]//parent::h3//following-sibling::div/ul/li[@class="show-all"]/a[text()="Show All"]')
+        driver.execute_script("arguments[0].click();", res)
+    except TimeoutException:
+        print('No Former "Show All" button found! Skipping...')
+    except NoSuchElementException:
+        print("Cannot find Show All Button")
+
+    try:
+        data["players"] = []
+        res = driver.find_elements(By.XPATH, '//tr[@class="Player"]')
+        for item in res:
+            id = item.find_element(By.XPATH, './td[@class="ID"]').text
+            name = item.find_element(By.XPATH, './td[@class="Name"]').text
+            data["players"].append({"username":id, "name":name})
+    except NoSuchElementException:
+        print("\n Unable to locate players! \n")
+
+
+    return data
+
+def getAllTeamInfo(all_team_links):
+    all_team_data = {}
+    for link in all_team_links:
+        team_data = getTeamInfo(link)
+        all_team_data[team_data["team-name"]] = team_data
+    
+    return all_team_data
+
+
+
+
+
 
 
 
 
 def main():
 
-    team_names, team_links = getTeams()
+    #team_names, team_links = getTeams()
+    
+    #serializeList("team_links", team_links)
+    team_links = readList("team_links")
+
+    all_team_data = getAllTeamInfo(team_links)
 
     # Wait 3 seconds before deleting
     time.sleep(3)
