@@ -131,7 +131,7 @@ def getTournamentsAlgo(page_url,full_xpath):
     tournaments = {}
     tournament_name = ''                                                                                                                                            
     tournament_info = {}
-    year_iteration = 4                  #year: 4 = 2022, 5 = 2021                                                                      
+    year_iteration = 3                  #year:  4 = 2022, 5 = 2021  (for s-tier only)                                                                    
     tournament_iteration = 2            #row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.                                                                           
 
     getURL(page_url)                                                    # Uses the driver to open the URL
