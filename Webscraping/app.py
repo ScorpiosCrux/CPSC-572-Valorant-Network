@@ -91,14 +91,12 @@ def getTournaments():
                 'https://liquipedia.net/valorant/A-Tier_Tournaments',
                 'https://liquipedia.net/valorant/B-Tier_Tournaments',
                 'https://liquipedia.net/valorant/C-Tier_Tournaments',
-                # 'https://liquipedia.net/valorant/Qualifier_Tournaments',
-                # 'https://liquipedia.net/valorant/Female_Tournaments'
                 ]
 
     #year: 4 = 2022, 5 = 2021
     #tournament: row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.
     full_xpath = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[{year}]/div/div[{tournament}]/div[1]/b/a'
-    
+    xpath_participants = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[10]/div[{row}]/div/div[{column}]/div/div/center/a'
     tournaments={}
     #Nested dictionary to hold data 
     # tournaments = {
@@ -125,6 +123,7 @@ def getTournaments():
         # tournament_info = getTournamentsAlgo(url,full_xpath)[1]
         # tournaments [tournament_name] = tournament_info
     return tournaments
+    #should return a total of 254 turnaments 
 
 def getTournamentsAlgo(page_url,full_xpath):
     # Function vars
@@ -166,6 +165,14 @@ def getTournamentsAlgo(page_url,full_xpath):
     return tournaments
     # return tournament_name , tournament_info
 
+def getTournamentParticipants(page_url,full_xpath):
+    participants =  []
+    info = {
+        'participants': participants,
+    }
+
+    row_iteration = 1
+    column_iteration = 1
 
 def main():
 
