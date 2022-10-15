@@ -103,34 +103,43 @@ def getTeamInfo(team_link):
 
     data = {}
 
+    # Team Name
     try:
-        # Get Name                           /html/body/div[3]/main/div/h1/span
-        #element = wait.until(EC.element_to_be_clickable((By.XPATH, '//h3/span[@id="Former"]//parent::h3//following-sibling::div/ul/li[@class="show-all"]/a[text()="Show All"]')))
-
         res = wait.until(EC.presence_of_element_located((By.XPATH, "//h1/span")))
-        #res = wait.until(EC.visibility_of_element_located)
-        #res = driver.find_element(By.XPATH, "//h1/span")
         team_name = res.text
         data["team-name"] = team_name
     except TimeoutException as e:
-        print("\n UNABLE TO LOCATE H1! \n")
+        print("\n Unable to locate team_name! \n")
 
-    # Find element div tag with Location as text. Then get it's sibling which is a div
-    res = driver.find_element(By.XPATH, '//div[text()="Location:"]/following-sibling::div')
-    country = res.text.strip()
-    data["country"] = country
+    # Country
+    try:
+        # Find element div tag with Location as text. Then get it's sibling which is a div
+        res = driver.find_element(By.XPATH, '//div[text()="Location:"]/following-sibling::div')
+        country = res.text.strip()
+        data["country"] = country
+    except NoSuchElementException:
+        data["country"] = ""
+        print("\n Unable to locate country! \n")
 
-    res = driver.find_element(By.XPATH, '//div[text()="Region:"]/following-sibling::div')
-    region = res.text.strip()
-    data["region"] = region
+    # Region
+    try:
+        res = driver.find_element(By.XPATH, '//div[text()="Region:"]/following-sibling::div')
+        region = res.text.strip()
+        data["region"] = region
+    except NoSuchElementException:
+        data["region"] = ""
+        print("\n Unable to locate region! \n")
     
+    # Winnings
     try:
         res = driver.find_element(By.XPATH, '//div[text()="Approx. Total Winnings:"]/following-sibling::div')
         winnings = res.text.strip()
         data["winnings"] = winnings
     except NoSuchElementException:
         data["winnings"] = ""
+        print("\n Unable to locate winnings! \n")
 
+    # Status
     try:
         res = driver.find_element(By.XPATH, '//div[text()="Disbanded"]/following-sibling::div')
         data["status"] = "disbanded"
@@ -138,33 +147,26 @@ def getTeamInfo(team_link):
         data["status"] = "active"
 
 
-
     # Click on show all button, need to execute script because button is not visible for click
     try:
         element = wait.until(EC.element_to_be_clickable((By.XPATH, '//h3/span[@id="Former"]//parent::h3//following-sibling::div/ul/li[@class="show-all"]/a[text()="Show All"]')))
         res = driver.find_element(By.XPATH, '//h3/span[@id="Former"]//parent::h3//following-sibling::div/ul/li[@class="show-all"]/a[text()="Show All"]')
         driver.execute_script("arguments[0].click();", res)
-    except TimeoutException as e:
+    except TimeoutException:
         print('No Former "Show All" button found! Skipping...')
-    except NoSuchElementException as e:
+    except NoSuchElementException:
         print("Cannot find Show All Button")
 
+    try:
+        data["players"] = []
+        res = driver.find_elements(By.XPATH, '//tr[@class="Player"]')
+        for item in res:
+            id = item.find_element(By.XPATH, './td[@class="ID"]').text
+            name = item.find_element(By.XPATH, './td[@class="Name"]').text
+            data["players"].append({"username":id, "name":name})
+    except NoSuchElementException:
+        print("\n Unable to locate players! \n")
 
-    data["players"] = []
-    res = driver.find_elements(By.XPATH, '//tr[@class="Player"]')
-    for item in res:
-        id = item.find_element(By.XPATH, './td[@class="ID"]').text
-        name = item.find_element(By.XPATH, './td[@class="Name"]').text
-        """ dates = item.find_elements(By.XPATH, './td[@class="Date"]')
-        for date in dates:
-            if len(dates) == 1:
-                print("1")
-            elif len(dates) == 2:
-                print("2")
-            elif len(dates) == 3:
-                print("3") """
-
-        data["players"].append({"username":id, "name":name})
 
     return data
 
