@@ -99,31 +99,73 @@ def getTournaments():
     #tournament: row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.
     full_xpath = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[{year}]/div/div[{tournament}]/div[1]/b/a'
     
+    tournaments={}
     #Nested dictionary to hold data 
-    tournaments = {
-        'tournament': {
-            'name': '',
-            'tier': '',
-            'participants': [],
-            'matches': [{
-                'team1': {
-                    'name': '',
-                    'members': []
-                },
-                'team2':{
-                    'name': '',
-                    'members': []
-                },
-                'winner': ''
-            }]
-        }
-    }
+    # tournaments = {
+    #     'tournament': {
+    #         'name': '',
+    #         'participants': [],
+    #         'matches': [{
+    #             'team1': {
+    #                 'name': '',
+    #                 'members': []
+    #             },
+    #             'team2':{
+    #                 'name': '',
+    #                 'members': []
+    #             },
+    #             'winner': ''
+    #         }]
+    #     }
+    # }
+
+    for url in page_urls:
+        tournaments = {**tournaments,**getTournamentsAlgo(url,full_xpath)}
+        # tournament_name = getTournamentsAlgo(url,full_xpath)[0]
+        # tournament_info = getTournamentsAlgo(url,full_xpath)[1]
+        # tournaments [tournament_name] = tournament_info
+    return tournaments
+
+def getTournamentsAlgo(page_url,full_xpath):
+    # Function vars
+    tournaments = {}
+    tournament_name = ''                                                                                                                                            
+    tournament_info = {}
+    year_iteration = 4                  #year: 4 = 2022, 5 = 2021                                                                      
+    tournament_iteration = 2            #row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.                                                                           
+
+    getURL(page_url)                                                    # Uses the driver to open the URL
+    formatted_xpath = full_xpath.format(year=year_iteration, tournament=tournament_iteration)
+    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, formatted_xpath)))
+
+    while (True):
+        while(True):
+            try:
+                formatted_xpath = full_xpath.format(year=year_iteration, tournament=tournament_iteration)
+                res = driver.find_element("xpath", formatted_xpath)
+                tournament_name = res.get_attribute('text')
+                tournament_link = res.get_attribute('href')
+                tournaments[tournament_name] = tournament_info
+                
+            except Exception as e:
+                print(e.args[0])
+                break
+            tournament_iteration += 1
+        # /html/body/div[3]/main/div/div[3]/div[3]/div/div[5]/div/div[2]/div[1]/b/a
+        tournament_iteration = 2                                                                                            # Reset Team Index
+        year_iteration += 1
+
+        if (year_iteration == 6 ):
+            break
+
+    return tournaments
+    # return tournament_name , tournament_info
 
 
 def main():
 
-    team_names, team_links = getTeams()
-
+    # team_names, team_links = getTeams()
+    getTournaments()
     # Wait 3 seconds before deleting
     time.sleep(3)
     print("Done")
