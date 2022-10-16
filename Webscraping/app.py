@@ -3,7 +3,7 @@ import pickle
 import time
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 chrome_options = Options()
 
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
-chrome_options.add_argument("--headless")
+#chrome_options.add_argument("--headless")
 
 chromeDriverPath = "/Users/vivid/Code/School/CPSC-572/CPSC-572-Valorant-Network/Webscraping/chromedriver"
 
