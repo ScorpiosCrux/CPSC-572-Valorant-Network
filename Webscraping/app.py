@@ -111,6 +111,8 @@ def getTournaments():
     #tournament: row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.
     full_xpath = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[{year}]/div/div[{tournament}]/div[1]/b/a'
     tournaments={}
+    tournament_names=[]
+    tournament_links=[]
     #Nested dictionary to hold data 
     # tournaments = {
     #     'tournament': {
@@ -129,98 +131,106 @@ def getTournaments():
     #         }]
     #     }
     # }
-
+    result = ()
     for url in page_urls:
-        tournaments = {**tournaments,**getTournamentsAlgo(url,full_xpath)}
+        # result = result + getTournamentsAlgo(url,full_xpath)
+        names, links = getTournamentsAlgo(page_url=url, full_xpath=full_xpath)
+        tournament_names=tournament_names + names
+        tournament_links.extend(links)
         # tournament_name = getTournamentsAlgo(url,full_xpath)[0]
         # tournament_info = getTournamentsAlgo(url,full_xpath)[1]
         # tournaments [tournament_name] = tournament_info
-    return tournaments
+    return tournament_names, tournament_links
     #should return a total of 254 turnaments 
 
 def getTournamentsAlgo(page_url,full_xpath):
     # Function vars
-    tournaments = {}
-    tournament_name = ''                                                                                                                                            
+    tournament_links = []
+    tournament_names = []
     tournament_info = {}
     tournament_iteration = 2 
+    getURL(page_url)
+    wait = WebDriverWait(driver, 1)
 
-    #because the pages are structured differently, we must do an if statement :(
-    if page_url == 'https://liquipedia.net/valorant/C-Tier_Tournaments':
-        year_iteration = 4 
-    else:
-        year_iteration = 3                  #year:  4 = 2022, 5 = 2021  (for s-tier only)                                                                    
+
+    try:
+        
+        res = driver.find_elements(By.CLASS_NAME, 'divCell.Tournament.Header')
+        for item in res:
+            tournament_name = item.find_element(By.XPATH, './b/a').text
+            tournament_link = item.find_element(By.XPATH, './b/a').get_attribute('href')
+            
+            tournament_links.append(tournament_link)
+            tournament_names.append(tournament_name)
+            
+    except NoSuchElementException as e:
+        print("\n Unable to locate page element. :( \n")
+
     
-    getURL(page_url)                                                    # Uses the driver to open the URL
-    formatted_xpath = full_xpath.format(year=year_iteration, tournament=tournament_iteration)
-    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, formatted_xpath)))
 
-    while (True):
-        while(True):
-            try:
-                formatted_xpath = full_xpath.format(year=year_iteration, tournament=tournament_iteration)
-                res = driver.find_element("xpath", formatted_xpath)
-                tournament_name = res.get_attribute('text')
-                tournament_link = res.get_attribute('href')
-                tournament_info['participants'] = getTournamentParticipants(tournament_link)
-                tournaments[tournament_name] = tournament_info
-                
-                
-            except Exception as e:
-                print(e.args[0])
-                break
-            tournament_iteration += 1
-
-        tournament_iteration = 2                                                                                            # Reset Team Index
-        year_iteration += 1
-
-        if (year_iteration == 6 ):
-            break
-
-    return tournaments
+   
+    return tournament_names,tournament_links
     # return tournament_name , tournament_info
 
 
 #creates an array that contains the names of each team in the tournament 
 def getTournamentParticipants(tournament_link):
-    xpath_participants = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[10]/div[{row}]/div/div[{column}]/div/div/center/a'
-                                              
-    # tournament_link = 'https://liquipedia.net/valorant/VCT/2022/Champions'
+    driver.get(tournament_link)                                        
     participants =  []
-    participant = ''
-    row_iteration = 1
-    column_iteration = 1
 
-    getURL(tournament_link)                                                    # Uses the driver to open the URL
-    formatted_xpath = xpath_participants.format(row=row_iteration, column=column_iteration)
-    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, formatted_xpath)))
-
-    while (True):
-        while(True):
-            try:
-                formatted_xpath = xpath_participants.format(row=row_iteration, column=column_iteration)
-                res = driver.find_element("xpath", formatted_xpath)
-                participant= res.get_attribute('text')
-                participants.append(participant)    
-            except Exception as e:
-                print(e.args[0])
-                break
-            column_iteration += 1
-
-        column_iteration = 1                                                                                            # Reset Team Index
-        row_iteration += 1
-
-        if (row_iteration >= 10 ):
-            break
+    try:
+        res = driver.find_elements(By.CLASS_NAME, 'teamcard')
+        for item in res:
+            name=item.find_element(By.XPATH, './center/a').text
+            participants.append(name)
+    except NoSuchElementException as e:
+        print("\n Unable to locate page element. :( \n")
 
     return participants
 
+def getTournamentMatches():
+    driver.get('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier')                                        
+    matches =  []
+
+    try:
+        res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
+        for item in res:
+            team2=item.find_element(By.XPATH, './div[@class="brkts-opponent-entry"]')
+            # team2=item.find_element(By.CLASS_NAME, 'brkts-opponent-entry').text
+            team2=item.find_element(By.XPATH,'')
+            team1=item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
+
+            # team2=item.find_element(By.XPATH, '(name.hidden-xs)[2]').text
+            
+            matches.append(team1,team2)
+
+    except NoSuchElementException as e:
+        print("\n Unable to locate page element. :( \n")
+
+    return matches
+
+
 def main():
-    getTournaments()
-    # getTournamentParticipants()
-    # team_names, team_links = getTeams()
-    # getTournaments()
-    # Wait 3 seconds before deleting
+    tournamentsWithInfo = {}
+
+    # tournaments = getTournaments()
+    # tournament_names=tournaments[0]
+    # tournament_links=tournaments[1]
+    index = 5
+    getTournamentMatches()
+    # for name in tournament_names:
+    #     tournamentsWithInfo[name] = {}
+    #     # for link in tournaments[1]:
+    #     participants = getTournamentParticipants(tournament_links[index])
+    #     matches = getTournamentMatches(tournament_links[index])
+    #     tournamentsWithInfo[name] = {'participants':participants}
+
+    #     index+=1 
+
+
+
+
+   
     time.sleep(3)
     print("Done")
 
