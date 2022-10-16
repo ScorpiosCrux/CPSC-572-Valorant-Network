@@ -192,17 +192,21 @@ def getTournamentMatches():
     driver.get('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier')                                        
     matches =  []
 
+
     try:
         res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
         for item in res:
-            team2=item.find_element(By.XPATH, './div[@class="brkts-opponent-entry"]')
             # team2=item.find_element(By.CLASS_NAME, 'brkts-opponent-entry').text
-            team2=item.find_element(By.XPATH,'')
             team1=item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
-
-            # team2=item.find_element(By.XPATH, '(name.hidden-xs)[2]').text
-            
-            matches.append(team1,team2)
+            team2=item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
+            winner=item.find_element(By.CLASS_NAME,'brkts-opponent-win')
+            match = {
+                'team1': team1,
+                'team2': team2,
+                'winner': ''
+            }
+            matches.append(match)
+            # matches.append(team1,team2)
 
     except NoSuchElementException as e:
         print("\n Unable to locate page element. :( \n")
