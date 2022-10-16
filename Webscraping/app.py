@@ -6,6 +6,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+
+
 
 chrome_options = Options()
 
@@ -84,6 +88,16 @@ def getTeamInfo(team_url):
     while(True):
         break
 
+def getPageContent(url,pathToContent):
+    wait = WebDriverWait(driver, 1)
+    extractedData = ''
+    try:
+        res = wait.until(EC.presence_of_element_located((By.XPATH, pathToContent)))
+        extractedData = res.text
+    except TimeoutException as e:
+        print("\n Unable to locate page element. :( \n")
+    return extractedData
+
 def getTournaments():
 
     page_urls = [
@@ -96,7 +110,6 @@ def getTournaments():
     #year: 4 = 2022, 5 = 2021
     #tournament: row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.
     full_xpath = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[{year}]/div/div[{tournament}]/div[1]/b/a'
-    xpath_participants = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[10]/div[{row}]/div/div[{column}]/div/div/center/a'
     tournaments={}
     #Nested dictionary to hold data 
     # tournaments = {
@@ -149,7 +162,9 @@ def getTournamentsAlgo(page_url,full_xpath):
                 res = driver.find_element("xpath", formatted_xpath)
                 tournament_name = res.get_attribute('text')
                 tournament_link = res.get_attribute('href')
+                tournament_info['participants'] = getTournamentParticipants(tournament_link)
                 tournaments[tournament_name] = tournament_info
+                
                 
             except Exception as e:
                 print(e.args[0])
@@ -165,19 +180,46 @@ def getTournamentsAlgo(page_url,full_xpath):
     return tournaments
     # return tournament_name , tournament_info
 
-def getTournamentParticipants(page_url,full_xpath):
-    participants =  []
-    info = {
-        'participants': participants,
-    }
 
+#creates an array that contains the names of each team in the tournament 
+def getTournamentParticipants(tournament_link):
+    xpath_participants = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[10]/div[{row}]/div/div[{column}]/div/div/center/a'
+                                              
+    # tournament_link = 'https://liquipedia.net/valorant/VCT/2022/Champions'
+    participants =  []
+    participant = ''
     row_iteration = 1
     column_iteration = 1
 
-def main():
+    getURL(tournament_link)                                                    # Uses the driver to open the URL
+    formatted_xpath = xpath_participants.format(row=row_iteration, column=column_iteration)
+    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, formatted_xpath)))
 
-    # team_names, team_links = getTeams()
+    while (True):
+        while(True):
+            try:
+                formatted_xpath = xpath_participants.format(row=row_iteration, column=column_iteration)
+                res = driver.find_element("xpath", formatted_xpath)
+                participant= res.get_attribute('text')
+                participants.append(participant)    
+            except Exception as e:
+                print(e.args[0])
+                break
+            column_iteration += 1
+
+        column_iteration = 1                                                                                            # Reset Team Index
+        row_iteration += 1
+
+        if (row_iteration >= 10 ):
+            break
+
+    return participants
+
+def main():
     getTournaments()
+    # getTournamentParticipants()
+    # team_names, team_links = getTeams()
+    # getTournaments()
     # Wait 3 seconds before deleting
     time.sleep(3)
     print("Done")
