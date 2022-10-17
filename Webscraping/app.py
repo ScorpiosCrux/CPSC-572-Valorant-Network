@@ -16,10 +16,12 @@ chrome_options = Options()
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
 # chrome_options.add_argument("--headless")
 
-chromeDriverPath = "/Users/mar/Documents/SCHOOL/FALL2022/CPSC572/project/CPSC-572-Valorant-Network/chromedriver"
+chromeDriverPath = "/Users/vivid/Code/School/CPSC-572/CPSC-572-Valorant-Network/Webscraping/chromedriver"
 
 service = Service(executable_path=chromeDriverPath)
 driver = webdriver.Chrome(service=service, options=chrome_options)
+driver.set_window_position(0, 0)
+
 
 
 #Get the URL, you can add exception handling here or even assertions
@@ -191,34 +193,32 @@ def getTournamentParticipants(tournament_link):
 def getTournamentMatches():
     driver.get('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier')                                        
     matches =  []
+    teams = set()
+    team_members = []
 
 
     try:
         res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
         for item in res:
-            # team2=item.find_element(By.CLASS_NAME, 'brkts-opponent-entry').text
-            t1=item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
-            t2=item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
-            winner=item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
+            t1 = item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
+            t2 = item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
+            winner = item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
+            matches.append({'team-1-name': t1, 'team-2-name': t2, 'winner': winner})
+            teams.add(t1)
+            teams.add(t2)
 
-            team1Members = getTournamentTeamMembers('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier',t1)
-            team2Members = getTournamentTeamMembers('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier',t2)
+        wait = WebDriverWait(driver, 1)
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
+        res = driver.find_element(By.XPATH, '//button[text()="Show Players"]')
+        driver.execute_script("arguments[0].click();", res)
 
-            team1 = {
-                'members': team1Members
-            }
+        for team in teams:
+            url = 'https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier'
+            members = getTournamentTeamMembers(url, team)
+            team_info = {'team-name': team, 'team-members': members}
+            team_members.append(team_info)
+            
 
-            team2 = {
-                'members': team2Members
-            }
-
-            match = {
-                'team1': team1,
-                'team2': team2,
-                'winner': winner
-            }
-            matches.append(match)
-            # matches.append(team1,team2)
 
     except NoSuchElementException as e:
         print("\n Unable to locate page element. :( \n")
@@ -228,19 +228,16 @@ def getTournamentMatches():
 def getTournamentTeamMembers(url,team):
     getURL(url)
     members = []
-    wait = WebDriverWait(driver, 1)
     
-    element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
-    res = driver.find_element(By.XPATH, '//button[text()="Show Players"]')
-    driver.execute_script("arguments[0].click();", res)
 
     try:
-        # res = driver.find_elements(By.XPATH, '//a[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table/following-sibling::table/tbody/tr')
-        res = driver.find_elements(By.XPATH, '//a[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]')
+        res = driver.find_elements(By.XPATH, '//a[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
         for item in res:
             # member = item.find_element(By.XPATH, './td/a').text
-            member = item.find_element(By.XPATH, './table/tbody/tr/td/a').text
-            members.append(member)
+            elements = item.find_elements(By.XPATH, './td/a')
+            for name in elements:
+                member = name.get_attribute('title')
+                members.append(member)
      
 
     except NoSuchElementException as e:
