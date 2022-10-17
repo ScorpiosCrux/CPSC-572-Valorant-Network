@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait
 
 chrome_options = Options()
 
@@ -175,6 +175,7 @@ def getAllTeamInfo(all_team_links):
     for link in all_team_links:
         team_data = getTeamInfo(link)
         all_team_data[team_data["team-name"]] = team_data
+
     
     return all_team_data
 
@@ -188,12 +189,16 @@ def getAllTeamInfo(all_team_links):
 
 def main():
 
+    test = readList("all-team-data")
+
     #team_names, team_links = getTeams()
     
     #serializeList("team_links", team_links)
     team_links = readList("team_links")
 
     all_team_data = getAllTeamInfo(team_links)
+    serializeList("all-team-data", all_team_data)
+
 
     # Wait 3 seconds before deleting
     time.sleep(3)
