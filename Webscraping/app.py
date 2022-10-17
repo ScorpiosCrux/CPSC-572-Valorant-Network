@@ -177,6 +177,7 @@ def getAllTeamInfo(all_team_links):
     for link in all_team_links:
         team_data = getTeamInfo(link)
         all_team_data[team_data["team-name"]] = team_data
+
     
     return all_team_data
 
