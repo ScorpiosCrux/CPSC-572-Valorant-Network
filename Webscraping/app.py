@@ -1,4 +1,6 @@
 import time
+import pickle
+import json
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -90,24 +92,7 @@ def getTeamInfo(team_url):
     while(True):
         break
 
-
-
-def getTournaments():
-
-    page_urls = [
-                'https://liquipedia.net/valorant/S-Tier_Tournaments',
-                'https://liquipedia.net/valorant/A-Tier_Tournaments',
-                'https://liquipedia.net/valorant/B-Tier_Tournaments',
-                'https://liquipedia.net/valorant/C-Tier_Tournaments',
-                ]
-
-    #year: 4 = 2022, 5 = 2021
-    #tournament: row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.
-    full_xpath = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[{year}]/div/div[{tournament}]/div[1]/b/a'
-    tournaments={}
-    tournament_names=[]
-    tournament_links=[]
-    #Nested dictionary to hold data 
+#Nested dictionary to hold data 
     # tournaments = {
     #     'tournament': {
     #         'name': '',
@@ -125,17 +110,31 @@ def getTournaments():
     #         }]
     #     }
     # }
+
+def getTournaments():
+
+    page_urls = [
+                'https://liquipedia.net/valorant/S-Tier_Tournaments',
+                'https://liquipedia.net/valorant/A-Tier_Tournaments',
+                'https://liquipedia.net/valorant/B-Tier_Tournaments',
+                'https://liquipedia.net/valorant/C-Tier_Tournaments',
+                ]
+
+    #year: 4 = 2022, 5 = 2021
+    #tournament: row # within div.. R1 = 2, R2 = 3, R3 = 4 and so on.
+    full_xpath = '/html/body/div[3]/main/div/div[3]/div[3]/div/div[{year}]/div/div[{tournament}]/div[1]/b/a'
+    tournaments={}
+    tournament_names=[]
+    tournament_links=[]
+    
     result = ()
     for url in page_urls:
-        # result = result + getTournamentsAlgo(url,full_xpath)
         names, links = getTournamentsAlgo(page_url=url, full_xpath=full_xpath)
         tournament_names=tournament_names + names
         tournament_links.extend(links)
-        # tournament_name = getTournamentsAlgo(url,full_xpath)[0]
-        # tournament_info = getTournamentsAlgo(url,full_xpath)[1]
-        # tournaments [tournament_name] = tournament_info
+        
     return tournament_names, tournament_links
-    #should return a total of 254 turnaments 
+    #should return a total of 252 turnaments 
 
 def getTournamentsAlgo(page_url,full_xpath):
     # Function vars
@@ -243,6 +242,12 @@ def getTournamentTeamMembers(url,team):
 
     return members
 
+# Dumps a list in a file
+def serializeList(file_name, list):
+    with open(file_name, 'w') as convert_file:
+     convert_file.write(json.dumps(list))
+    # with open(file_name, 'wb') as fp:
+    #     pickle.dump(str(list), fp)
 
 def main():
     tournamentsWithInfo = {}
@@ -258,11 +263,11 @@ def main():
         participants = getTournamentParticipants(tournament_links[index])
         matches = getTournamentMatches(tournament_links[index])
         tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
-
+        serializeList('tournament_info_partial',tournamentsWithInfo)
 
         index+=1
-    
-     
+
+    serializeList('tournament_info',tournamentsWithInfo)
 
 
 
