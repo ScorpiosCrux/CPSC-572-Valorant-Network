@@ -16,7 +16,7 @@ chrome_options = Options()
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
 # chrome_options.add_argument("--headless")
 
-chromeDriverPath = "/Users/vivid/Code/School/CPSC-572/CPSC-572-Valorant-Network/Webscraping/chromedriver"
+chromeDriverPath = "./chromedriver"
 
 service = Service(executable_path=chromeDriverPath)
 driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -90,15 +90,7 @@ def getTeamInfo(team_url):
     while(True):
         break
 
-def getPageContent(url,pathToContent):
-    wait = WebDriverWait(driver, 1)
-    extractedData = ''
-    try:
-        res = wait.until(EC.presence_of_element_located((By.XPATH, pathToContent)))
-        extractedData = res.text
-    except TimeoutException as e:
-        print("\n Unable to locate page element. :( \n")
-    return extractedData
+
 
 def getTournaments():
 
@@ -190,12 +182,11 @@ def getTournamentParticipants(tournament_link):
 
     return participants
 
-def getTournamentMatches():
-    driver.get('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier')                                        
+def getTournamentMatches(tournament_link):
+    driver.get(tournament_link)                                        
     matches =  []
     teams = set()
-    team_members = []
-
+    team_members = {}
 
     try:
         res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
@@ -203,7 +194,11 @@ def getTournamentMatches():
             t1 = item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
             t2 = item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
             winner = item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
-            matches.append({'team-1-name': t1, 'team-2-name': t2, 'winner': winner})
+            matches.append({
+                t1: '', 
+                t2: '',
+                'winner': winner
+                })
             teams.add(t1)
             teams.add(t2)
 
@@ -212,13 +207,17 @@ def getTournamentMatches():
         res = driver.find_element(By.XPATH, '//button[text()="Show Players"]')
         driver.execute_script("arguments[0].click();", res)
 
+        team_info={}
         for team in teams:
-            url = 'https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier'
+            url = tournament_link
             members = getTournamentTeamMembers(url, team)
-            team_info = {'team-name': team, 'team-members': members}
-            team_members.append(team_info)
-            
+            team_members[team]=members
 
+        
+        for match in matches:
+            for team in team_members:
+                if team in match:
+                    match[team]=team_members[team]
 
     except NoSuchElementException as e:
         print("\n Unable to locate page element. :( \n")
@@ -229,7 +228,6 @@ def getTournamentTeamMembers(url,team):
     getURL(url)
     members = []
     
-
     try:
         res = driver.find_elements(By.XPATH, '//a[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
         for item in res:
@@ -248,20 +246,23 @@ def getTournamentTeamMembers(url,team):
 
 def main():
     tournamentsWithInfo = {}
+    
+    tournaments = getTournaments()
+    tournament_names=tournaments[0]
+    tournament_links=tournaments[1]
+    index = 0
+    
+    for name in tournament_names:
+        tournamentsWithInfo[name] = {}
+        # for link in tournaments[1]:
+        participants = getTournamentParticipants(tournament_links[index])
+        matches = getTournamentMatches(tournament_links[index])
+        tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
 
-    # tournaments = getTournaments()
-    # tournament_names=tournaments[0]
-    # tournament_links=tournaments[1]
-    index = 5
-    getTournamentMatches()
-    # for name in tournament_names:
-    #     tournamentsWithInfo[name] = {}
-    #     # for link in tournaments[1]:
-    #     participants = getTournamentParticipants(tournament_links[index])
-    #     matches = getTournamentMatches(tournament_links[index])
-    #     tournamentsWithInfo[name] = {'participants':participants}
 
-    #     index+=1 
+        index+=1
+    
+     
 
 
 
