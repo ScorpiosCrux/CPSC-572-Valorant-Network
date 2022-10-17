@@ -197,13 +197,25 @@ def getTournamentMatches():
         res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
         for item in res:
             # team2=item.find_element(By.CLASS_NAME, 'brkts-opponent-entry').text
-            team1=item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
-            team2=item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
-            winner=item.find_element(By.CLASS_NAME,'brkts-opponent-win')
+            t1=item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
+            t2=item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
+            winner=item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
+
+            team1Members = getTournamentTeamMembers('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier',t1)
+            team2Members = getTournamentTeamMembers('https://liquipedia.net/valorant/VCT/2022/East_Asia/Last_Chance_Qualifier',t2)
+
+            team1 = {
+                'members': team1Members
+            }
+
+            team2 = {
+                'members': team2Members
+            }
+
             match = {
                 'team1': team1,
                 'team2': team2,
-                'winner': ''
+                'winner': winner
             }
             matches.append(match)
             # matches.append(team1,team2)
@@ -212,6 +224,29 @@ def getTournamentMatches():
         print("\n Unable to locate page element. :( \n")
 
     return matches
+
+def getTournamentTeamMembers(url,team):
+    getURL(url)
+    members = []
+    wait = WebDriverWait(driver, 1)
+    
+    element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
+    res = driver.find_element(By.XPATH, '//button[text()="Show Players"]')
+    driver.execute_script("arguments[0].click();", res)
+
+    try:
+        # res = driver.find_elements(By.XPATH, '//a[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table/following-sibling::table/tbody/tr')
+        res = driver.find_elements(By.XPATH, '//a[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]')
+        for item in res:
+            # member = item.find_element(By.XPATH, './td/a').text
+            member = item.find_element(By.XPATH, './table/tbody/tr/td/a').text
+            members.append(member)
+     
+
+    except NoSuchElementException as e:
+        print("\n Unable to locate page element. :( \n")
+
+    return members
 
 
 def main():
