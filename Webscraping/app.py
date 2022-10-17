@@ -15,11 +15,11 @@ chrome_options = Options()
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
 chrome_options.add_argument("--headless")
 
-#chromeDriverPath = "C:\\Users\\jasmi\\Desktop\\CPSC572\\CPSC-572-Valorant-Network\\Webscraping\\chromedriver.exe"
-chromeDriverPath = './Webscraping/chromedriver'
+chromeDriverPath = "C:\\Users\\jasmi\\Desktop\\CPSC572\\CPSC-572-Valorant-Network\\Webscraping\\chromedriver.exe"
+#chromeDriverPath = './Webscraping/chromedriver'
 
 service = Service(executable_path=chromeDriverPath)
-driver = webdriver.Chrome(service=service, chrome_options=chrome_options)
+driver = webdriver.Chrome(service=service)
 
 
 #Get the URL, you can add exception handling here or even assertions
@@ -329,6 +329,8 @@ def getPlayerInfo(player_link):
             data["matches"].append({"tournament":tournament_name,"result":result, "team":team_name})
     except NoSuchElementException:
         print("\n Unable to locate matches! \n")
+    except IndexError:
+        print("\n Unable to locate matches! \n")
 
 
     return data
@@ -361,8 +363,8 @@ def main():
     # player_names, player_links = getPlayers()
     # serializeList("player_links", player_links)
     all_player_links = readList("player_links")
-    start = 0
-    end = 200
+    start = 2000
+    end = 2031
     load = all_player_links[start:end]
     all_player_data = getAllPlayerInfo(load)
     serializeList("all_player_data" + str(start) + "-" + str(end), all_player_data)
