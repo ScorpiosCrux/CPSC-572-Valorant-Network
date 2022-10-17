@@ -3,7 +3,7 @@ import pickle
 import time
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -15,10 +15,11 @@ chrome_options = Options()
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
 chrome_options.add_argument("--headless")
 
-chromeDriverPath = "C:\\Users\\jasmi\\Desktop\\CPSC572\\CPSC-572-Valorant-Network\\Webscraping\\chromedriver.exe"
+#chromeDriverPath = "C:\\Users\\jasmi\\Desktop\\CPSC572\\CPSC-572-Valorant-Network\\Webscraping\\chromedriver.exe"
+chromeDriverPath = './Webscraping/chromedriver'
 
 service = Service(executable_path=chromeDriverPath)
-driver = webdriver.Chrome(service=service)
+driver = webdriver.Chrome(service=service, chrome_options=chrome_options)
 
 
 #Get the URL, you can add exception handling here or even assertions
@@ -218,7 +219,7 @@ def getPlayersAlgo(page_url, full_xpath):
 
     getURL(page_url)                                                                                      # Uses the driver to open the URL
     formatted_xpath = full_xpath.format(letter=letter_iteration, player=player_iteration)
-    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, formatted_xpath)))
+    WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, formatted_xpath)))
 
     while (True):
         while(True):
@@ -247,8 +248,6 @@ def getPlayerInfo(player_link):
     print("Working on: " + player_link)
     getURL(player_link)
     wait = WebDriverWait(driver, 1)
-
-
     data = {}
 
     # Player Name
@@ -335,16 +334,13 @@ def getPlayerInfo(player_link):
     return data
 
 def getAllPlayerInfo(all_player_links):
+    
     all_player_data = {}
-    counter = 0
+
     for link in all_player_links:
         player_data = getPlayerInfo(link)
         all_player_data[player_data["player-name"]] = player_data
-        counter+1
-        if counter == 200:
-            counter = 0
-            serializeList("all_player_data", all_player_data)
-    
+   
     return all_player_data
 
 
@@ -364,8 +360,14 @@ def main():
 
     # player_names, player_links = getPlayers()
     # serializeList("player_links", player_links)
-    player_links = readList("player_links")
-    all_player_data =getAllPlayerInfo(player_links)
+    all_player_links = readList("player_links")
+    start = 0
+    end = 200
+    load = all_player_links[start:end]
+    all_player_data = getAllPlayerInfo(load)
+    serializeList("all_player_data" + str(start) + "-" + str(end), all_player_data)
+
+
 
     # Wait 3 seconds before deleting
     time.sleep(3)
