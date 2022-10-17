@@ -13,13 +13,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 chrome_options = Options()
 
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
-chrome_options.add_argument("--headless")
+#chrome_options.add_argument("--headless")
 
 chromeDriverPath = "C:\\Users\\jasmi\\Desktop\\CPSC572\\CPSC-572-Valorant-Network\\Webscraping\\chromedriver.exe"
 #chromeDriverPath = './Webscraping/chromedriver'
 
 service = Service(executable_path=chromeDriverPath)
-driver = webdriver.Chrome(service=service)
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
 
 #Get the URL, you can add exception handling here or even assertions
@@ -340,8 +340,11 @@ def getAllPlayerInfo(all_player_links):
     all_player_data = {}
 
     for link in all_player_links:
-        player_data = getPlayerInfo(link)
-        all_player_data[player_data["player-name"]] = player_data
+        try:
+            player_data = getPlayerInfo(link)
+            all_player_data[player_data["player-name"]] = player_data
+        except Exception as e:
+            print('ERROR!')
    
     return all_player_data
 
@@ -362,11 +365,14 @@ def main():
 
     # player_names, player_links = getPlayers()
     # serializeList("player_links", player_links)
+    test = readList("all_player_data0-200")
     all_player_links = readList("player_links")
     start = 2000
     end = 2031
     load = all_player_links[start:end]
+
     all_player_data = getAllPlayerInfo(load)
+    
     serializeList("all_player_data" + str(start) + "-" + str(end), all_player_data)
 
 
