@@ -89,6 +89,10 @@ def exportJSON(file_name, nodes):
     with open(file_name, 'w') as fout:
         json.dump(nodes , fout, indent=4)
 
+def importJSON(file_name):
+    with open(file_name, "r") as read_file:
+        data = json.load(read_file)
+
 
 def main():
     all_data = readList("all_player_data")
