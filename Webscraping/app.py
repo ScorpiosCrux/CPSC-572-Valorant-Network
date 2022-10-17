@@ -1,6 +1,7 @@
 
 import pickle
 import time
+import json
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -15,8 +16,8 @@ chrome_options = Options()
 # IMPORTANT: Uncomment this if the page is not loading because your window is behind 
 #chrome_options.add_argument("--headless")
 
-chromeDriverPath = "C:\\Users\\jasmi\\Desktop\\CPSC572\\CPSC-572-Valorant-Network\\Webscraping\\chromedriver.exe"
-#chromeDriverPath = './Webscraping/chromedriver'
+#chromeDriverPath = "C:\\Users\\jasmi\\Desktop\\CPSC572\\CPSC-572-Valorant-Network\\Webscraping\\chromedriver.exe"
+chromeDriverPath = './Webscraping/chromedriver'
 
 service = Service(executable_path=chromeDriverPath)
 driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -349,23 +350,18 @@ def getAllPlayerInfo(all_player_links):
     return all_player_data
 
 
-
-
-
-
-
-def main():
-
-    #team_names, team_links = getTeams()
+def mineTeamData():
+    team_names, team_links = getTeams()
     
-    #serializeList("team_links", team_links)
-    # team_links = readList("team_links")
+    serializeList("team_links", team_links)
+    team_links = readList("team_links")
 
-    # all_team_data = getAllTeamInfo(team_links)
+    all_team_data = getAllTeamInfo(team_links)
 
-    # player_names, player_links = getPlayers()
-    # serializeList("player_links", player_links)
-    test = readList("all_player_data0-200")
+    player_names, player_links = getPlayers()
+    serializeList("player_links", player_links)
+
+def minePlayerData():
     all_player_links = readList("player_links")
     start = 2000
     end = 2031
@@ -376,9 +372,76 @@ def main():
     serializeList("all_player_data" + str(start) + "-" + str(end), all_player_data)
 
 
+def combineData():
+    file_names = [
+                    "all_player_data0-200",
+                    "all_player_data199-300",
+                    "all_player_data299-400",
+                    "all_player_data399-500",
+                    "all_player_data499-600",
+                    "all_player_data599-700",
+                    "all_player_data699-800",
+                    "all_player_data799-900",
+                    "all_player_data899-1000",
+                    "all_player_data1000-1100",
+                    "all_player_data1100-1200",
+                    "all_player_data1199-1300",
+                    "all_player_data1299-1400",
+                    "all_player_data1400-1500",
+                    "all_player_data1499-1600",
+                    "all_player_data1599-1700",
+                    "all_player_data1699-1800",
+                    "all_player_data1799-1900",
+                    "all_player_data1899-2000",
+                    "all_player_data2000-2031",
+                ]
 
-    # Wait 3 seconds before deleting
-    time.sleep(3)
+    all_data = {}
+    for file_name in file_names:
+        data = readList(file_name)
+        all_data.update(data)
+
+    serializeList("all_player_data", all_data)
+    
+    print("Finished Combining Data!")
+    
+
+def generateNodes(all_data):
+    nodes = []
+    id = 0
+    for username, data in all_data.items():
+
+        node = {
+            "id": id,
+            "username": username,
+            "age": data['age'],
+            "nationality": data['nationality'],
+            "pro-matches": len(data['matches']),
+            "winnings": data['winnings']
+
+        }
+        nodes.append(node)
+        id += 1
+
+    return nodes
+
+def exportJSON(file_name, nodes):
+    with open(file_name, 'w') as fout:
+        json.dump(nodes , fout, indent=4)
+
+
+def main():
+
+    
+    all_data = readList("all_player_data")
+    nodes = generateNodes(all_data)
+    exportJSON("nodes.json", nodes)
+
+   
+
+
+
+    
     print("Done")
 
 if __name__ == "__main__":
