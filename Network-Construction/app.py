@@ -85,6 +85,42 @@ def generateNodes(all_data):
 
     return nodes
 
+def generateLinks():
+    tournament_data = importJSON("Webscraping/tournament-data/tournament_info")
+    player_data = importJSON("Network-Construction/nodes.json")
+    links = []
+
+
+
+    for tournament, data in tournament_data.items():
+        matches = data['matches']
+        if (len(matches) != 0):
+            for match in matches:
+                for key, team in match.items():
+                    if (key == 'winner'):
+                        continue
+                    # for player_i in team:
+                    #     for player_j in team:
+                    #         if (player_i != player_j):
+                    #             links.append((player_i, player_j))
+                    #             print("test")
+
+                    # Complete graph
+                    increment = 0
+                    for i in range(increment, len(team)):
+                        for j in range(increment, len(team)):
+                            if (team[i] == team[j]):
+                                continue
+                            link = (team[i], team[j])
+                            links.append(link)
+                            print("Done!")
+                        increment += 1
+
+
+
+
+    print("Done!")
+
 def exportJSON(file_name, nodes):
     with open(file_name, 'w') as fout:
         json.dump(nodes , fout, indent=4)
@@ -93,11 +129,15 @@ def importJSON(file_name):
     with open(file_name, "r") as read_file:
         data = json.load(read_file)
 
+    return data
+
 
 def main():
-    all_data = readList("all_player_data")
-    nodes = generateNodes(all_data)
-    exportJSON("nodes.json", nodes)
+    # all_data = readList("all_player_data")
+    # nodes = generateNodes(all_data)
+    # exportJSON("nodes.json", nodes)
+
+    generateLinks()
     
     print("Done")
 
