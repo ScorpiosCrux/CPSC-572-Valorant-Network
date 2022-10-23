@@ -92,24 +92,6 @@ def getTeamInfo(team_url):
     while(True):
         break
 
-#Nested dictionary to hold data 
-    # tournaments = {
-    #     'tournament': {
-    #         'name': '',
-    #         'participants': [],
-    #         'matches': [{
-    #             'team1': {
-    #                 'name': '',
-    #                 'members': []
-    #             },
-    #             'team2':{
-    #                 'name': '',
-    #                 'members': []
-    #             },
-    #             'winner': ''
-    #         }]
-    #     }
-    # }
 
 def getTournaments():
 
@@ -228,12 +210,17 @@ def getTournamentTeamMembers(url,team):
     members = []
     
     try:
-        res = driver.find_elements(By.XPATH, '//a[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
+        res = driver.find_elements(By.XPATH, '//*[@title="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
+        
+        if res==[]:
+            res = driver.find_elements(By.XPATH, '//*[@title="'+team+'"]/parent::a/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
+
         for item in res:
             # member = item.find_element(By.XPATH, './td/a').text
             elements = item.find_elements(By.XPATH, './td/a')
             for name in elements:
                 member = name.get_attribute('title')
+                member = member.replace(' (page does not exist)','')
                 members.append(member)
      
 
@@ -250,6 +237,7 @@ def serializeList(file_name, list):
     #     pickle.dump(str(list), fp)
 
 def main():
+
     tournamentsWithInfo = {}
     
     tournaments = getTournaments()
@@ -259,11 +247,10 @@ def main():
     
     for name in tournament_names:
         tournamentsWithInfo[name] = {}
-        # for link in tournaments[1]:
         participants = getTournamentParticipants(tournament_links[index])
         matches = getTournamentMatches(tournament_links[index])
         tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
-        serializeList('tournament_info_partial',tournamentsWithInfo)
+        serializeList('tournament_info_NEW',tournamentsWithInfo)
 
         index+=1
 
