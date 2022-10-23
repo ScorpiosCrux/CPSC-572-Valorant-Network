@@ -1,6 +1,7 @@
 import json
 import pickle
 import time
+import pandas as pd
 
 
 # Dumps a list in a file
@@ -48,7 +49,8 @@ def combinePlayerData():
     
 
 def generateNodes(all_data):
-    nodes = []
+    nodes = {}
+    # nodes = []
     id = 0
     for username, data in all_data.items():
         tournaments = set()
@@ -66,7 +68,7 @@ def generateNodes(all_data):
             win_rate = ""
 
 
-        node = {
+        nodes[username] = {
             "id": id,
             "username": username,
             "age": data['age'],
@@ -78,19 +80,16 @@ def generateNodes(all_data):
             "pro-matches-winrate": win_rate,
             "tournaments": len(tournaments),
             "winnings": data['winnings']
-
         }
-        nodes.append(node)
+        #nodes.append(node)
         id += 1
 
     return nodes
 
-def generateLinks():
+def generateLinks(nodes):
     tournament_data = importJSON("Webscraping/tournament-data/tournament_info")
     player_data = importJSON("Network-Construction/nodes.json")
     links = []
-
-
 
     for tournament, data in tournament_data.items():
         matches = data['matches']
@@ -99,11 +98,6 @@ def generateLinks():
                 for key, team in match.items():
                     if (key == 'winner'):
                         continue
-                    # for player_i in team:
-                    #     for player_j in team:
-                    #         if (player_i != player_j):
-                    #             links.append((player_i, player_j))
-                    #             print("test")
 
                     # Complete graph
                     increment = 0
@@ -111,19 +105,33 @@ def generateLinks():
                         for j in range(increment, len(team)):
                             if (team[i] == team[j]):
                                 continue
-                            link = (team[i], team[j])
+                            try:
+                                player_1 = nodes[team[i]]
+                                player_1_id = player_1["id"]
+                            except:
+                                print("Cannot find:" + team[i])
+                                continue;
+
+                            try:
+                                player_2 = nodes[team[j]]
+                                player_2_id = player_2["id"]
+                            except:
+                                print("Cannot find:" + team[j])
+                                continue;
+                            link = "{},{}".format(player_1_id, player_2_id)
                             links.append(link)
                             print("Done!")
                         increment += 1
 
-
-
-
+    return links
     print("Done!")
+
+
 
 def exportJSON(file_name, nodes):
     with open(file_name, 'w') as fout:
         json.dump(nodes , fout, indent=4)
+
 
 def importJSON(file_name):
     with open(file_name, "r") as read_file:
@@ -132,13 +140,28 @@ def importJSON(file_name):
     return data
 
 
+def writeFile(file_name, data):
+    with open(file_name, "w") as f:
+        f.write("Source,Target")
+        for item in data:
+            f.write(item + '\n')
+
+
+
+def pandaCSV(file_name, data):
+    pf = pd.DataFrame(data).to_csv(file_name, index=False)
+
+
+
 def main():
-    # all_data = readList("all_player_data")
-    # nodes = generateNodes(all_data)
+    all_data = readList("Webscraping/player-data/all_player_data")
+    nodes = generateNodes(all_data)
+    pandaCSV("out.csv", nodes)
     # exportJSON("nodes.json", nodes)
 
-    generateLinks()
-    
+    data = generateLinks(nodes)
+    writeFile("links.csv", data)
+
     print("Done")
 
 if __name__ == "__main__":
