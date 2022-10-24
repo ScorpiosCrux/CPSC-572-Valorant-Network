@@ -87,7 +87,7 @@ def generateNodes(all_data):
     return id, nodes
 
 def generateLinks(nodes, id):
-    tournament_data = importJSON("Webscraping/tournament-data/tournament_info")
+    tournament_data = importJSON("Webscraping/tournament-data/tournament_info_NEW")
     player_data = importJSON("Network-Construction/nodes.json")
     links = []
 
@@ -168,12 +168,12 @@ def pandaCSV(file_name, data):
 def main():
     all_data = readList("Webscraping/player-data/all_player_data")
     id, nodes = generateNodes(all_data)
-    pandaCSV("out.csv", nodes)
     # exportJSON("nodes.json", nodes)
 
     data = generateLinks(nodes, id)
-    exportJSON("nodes_all.json", nodes)
 
+    exportJSON("nodes_all.json", nodes)
+    pandaCSV("out.csv", nodes)
     writeFile("links.csv", data)
 
     print("Done")
