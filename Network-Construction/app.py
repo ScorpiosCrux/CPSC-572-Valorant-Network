@@ -84,9 +84,9 @@ def generateNodes(all_data):
         #nodes.append(node)
         id += 1
 
-    return nodes
+    return id, nodes
 
-def generateLinks(nodes):
+def generateLinks(nodes, id):
     tournament_data = importJSON("Webscraping/tournament-data/tournament_info")
     player_data = importJSON("Network-Construction/nodes.json")
     links = []
@@ -109,6 +109,12 @@ def generateLinks(nodes):
                                 player_1 = nodes[team[i]]
                                 player_1_id = player_1["id"]
                             except:
+                                nodes[team[i]] = {
+                                    "id": id,
+                                    "username": team[i],
+                                    "notes": "Unable to find player name."
+                                }
+                                id += 1
                                 print("Cannot find:" + team[i])
                                 continue;
 
@@ -116,6 +122,12 @@ def generateLinks(nodes):
                                 player_2 = nodes[team[j]]
                                 player_2_id = player_2["id"]
                             except:
+                                nodes[team[j]] = {
+                                    "id": id,
+                                    "username": team[j],
+                                    "notes": "Unable to find player name."
+                                }
+                                id += 1
                                 print("Cannot find:" + team[j])
                                 continue;
                             link = "{},{}".format(player_1_id, player_2_id)
@@ -155,11 +167,13 @@ def pandaCSV(file_name, data):
 
 def main():
     all_data = readList("Webscraping/player-data/all_player_data")
-    nodes = generateNodes(all_data)
+    id, nodes = generateNodes(all_data)
     pandaCSV("out.csv", nodes)
     # exportJSON("nodes.json", nodes)
 
-    data = generateLinks(nodes)
+    data = generateLinks(nodes, id)
+    exportJSON("nodes_all.json", nodes)
+
     writeFile("links.csv", data)
 
     print("Done")
