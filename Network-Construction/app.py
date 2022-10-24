@@ -46,13 +46,14 @@ def combinePlayerData():
     serializeList("all_player_data", all_data)
     
     print("Finished Combining Data!")
-    
+
 
 def generateNodes(all_data):
     nodes = {}
     # nodes = []
     id = 0
     for username, data in all_data.items():
+        username = username.lower()
         tournaments = set()
         total_games = len(data['matches'])
         games_won = 0
@@ -86,6 +87,36 @@ def generateNodes(all_data):
 
     return id, nodes
 
+def getPlayerID(nodes, name, id):
+    try:
+        player = nodes[name]
+        player_id = player["id"]
+        return player_id, id
+    except:
+        print("Cannot find: " + name)
+        nodes[name] = {
+            "id": id,
+            "username": name,
+            "age": "",
+            "status": "",
+            "nationality": "",
+            "pro-matches": -1,
+            "pro-matches-won": -1,
+            "pro-matches-lost": -1,
+            "pro-matches-winrate": -1,
+            "tournaments": -1,
+            "winnings": ""
+        }
+        tester = nodes[name]
+        id += 1
+
+        player = nodes[name]
+        player_id = player["id"]
+        return player_id, id
+        
+
+
+
 def generateLinks(nodes, id):
     tournament_data = importJSON("Webscraping/tournament-data/tournament_info_NEW")
     player_data = importJSON("Network-Construction/nodes.json")
@@ -103,40 +134,22 @@ def generateLinks(nodes, id):
                     increment = 0
                     for i in range(increment, len(team)):
                         for j in range(increment, len(team)):
-                            if (team[i] == team[j]):
-                                continue
-                            try:
-                                player_1 = nodes[team[i]]
-                                player_1_id = player_1["id"]
-                            except:
-                                nodes[team[i]] = {
-                                    "id": id,
-                                    "username": team[i],
-                                    "notes": "Unable to find player name."
-                                }
-                                id += 1
-                                print("Cannot find:" + team[i])
-                                continue;
 
-                            try:
-                                player_2 = nodes[team[j]]
-                                player_2_id = player_2["id"]
-                            except:
-                                nodes[team[j]] = {
-                                    "id": id,
-                                    "username": team[j],
-                                    "notes": "Unable to find player name."
-                                }
-                                id += 1
-                                print("Cannot find:" + team[j])
-                                continue;
+                            player_1 = team[i].lower()
+                            player_2 = team[j].lower()
+
+                            if (player_1 == player_2):
+                                continue
+                            
+                            player_1_id, id = getPlayerID(nodes=nodes, name=player_1, id=id)
+                            player_2_id, id = getPlayerID(nodes=nodes, name=player_2, id=id)
+
                             link = "{},{}".format(player_1_id, player_2_id)
                             links.append(link)
                             print("Done!")
                         increment += 1
 
     return links
-    print("Done!")
 
 
 
@@ -154,14 +167,15 @@ def importJSON(file_name):
 
 def writeFile(file_name, data):
     with open(file_name, "w") as f:
-        f.write("Source,Target")
+        f.write("Source,Target\n")
         for item in data:
             f.write(item + '\n')
 
 
 
 def pandaCSV(file_name, data):
-    pf = pd.DataFrame(data).to_csv(file_name, index=False)
+    pf = pd.DataFrame(data).T
+    pf.to_csv(file_name, index=False)
 
 
 
