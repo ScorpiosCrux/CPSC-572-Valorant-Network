@@ -214,7 +214,11 @@ def getTournamentTeamMembers(url,team):
         
         if res==[]:
             res = driver.find_elements(By.XPATH, '//*[@title="'+team+'"]/parent::a/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
-
+        if res==[]:
+            res = driver.find_elements(By.XPATH, '//*[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
+        if res==[]:
+            res = driver.find_elements(By.XPATH, '//*[@title="'+team+' (page does not exist)"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
+         
         for item in res:
             # member = item.find_element(By.XPATH, './td/a').text
             elements = item.find_elements(By.XPATH, './td/a')
@@ -237,24 +241,27 @@ def serializeList(file_name, list):
     #     pickle.dump(str(list), fp)
 
 def main():
-
-    tournamentsWithInfo = {}
     
-    tournaments = getTournaments()
-    tournament_names=tournaments[0]
-    tournament_links=tournaments[1]
-    index = 0
+    getTournamentMatches('https://liquipedia.net/valorant/Golden_Goose/2')
+   
+
+    # tournamentsWithInfo = {}
     
-    for name in tournament_names:
-        tournamentsWithInfo[name] = {}
-        participants = getTournamentParticipants(tournament_links[index])
-        matches = getTournamentMatches(tournament_links[index])
-        tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
-        serializeList('tournament_info_NEW',tournamentsWithInfo)
+    # tournaments = getTournaments()
+    # tournament_names=tournaments[0]
+    # tournament_links=tournaments[1]
+    # index = 0
+    
+    # for name in tournament_names:
+    #     tournamentsWithInfo[name] = {}
+    #     participants = getTournamentParticipants(tournament_links[index])
+    #     matches = getTournamentMatches(tournament_links[index])
+    #     tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
+    #     serializeList('tournament_info_NEW',tournamentsWithInfo)
 
-        index+=1
+    #     index+=1
 
-    serializeList('tournament_info',tournamentsWithInfo)
+    # serializeList('tournament_info',tournamentsWithInfo)
 
 
 
