@@ -242,26 +242,26 @@ def serializeList(file_name, list):
 
 def main():
     
-    getTournamentMatches('https://liquipedia.net/valorant/Golden_Goose/2')
+    # getTournamentMatches('https://liquipedia.net/valorant/Golden_Goose/2')
    
 
-    # tournamentsWithInfo = {}
+    tournamentsWithInfo = {}
     
-    # tournaments = getTournaments()
-    # tournament_names=tournaments[0]
-    # tournament_links=tournaments[1]
-    # index = 0
+    tournaments = getTournaments()
+    tournament_names=tournaments[0]
+    tournament_links=tournaments[1]
+    index = 0
     
-    # for name in tournament_names:
-    #     tournamentsWithInfo[name] = {}
-    #     participants = getTournamentParticipants(tournament_links[index])
-    #     matches = getTournamentMatches(tournament_links[index])
-    #     tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
-    #     serializeList('tournament_info_NEW',tournamentsWithInfo)
+    for name in tournament_names:
+        tournamentsWithInfo[name] = {}
+        participants = getTournamentParticipants(tournament_links[index])
+        matches = getTournamentMatches(tournament_links[index])
+        tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
+        serializeList('tournament_info_partial',tournamentsWithInfo)
 
-    #     index+=1
+        index+=1
 
-    # serializeList('tournament_info',tournamentsWithInfo)
+    serializeList('tournament_info_2.0',tournamentsWithInfo)
 
 
 
