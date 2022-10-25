@@ -171,17 +171,32 @@ def getTournamentMatches(tournament_link):
 
     try:
         res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
-        for item in res:
-            t1 = item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
-            t2 = item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
-            winner = item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
-            matches.append({
-                t1: '', 
-                t2: '',
-                'winner': winner
-                })
-            teams.add(t1)
-            teams.add(t2)
+        if res == []:
+            res = driver.find_elements(By.CLASS_NAME, 'bracket-game')
+            for item in res:
+                t1 = item.find_element(By.CLASS_NAME,'bracket-team-top').get_attribute('data-highlightingkey')
+                t2 = item.find_element(By.CLASS_NAME,'bracket-team-bottom').get_attribute('data-highlightingkey')
+                winner = item.find_element(By.XPATH,'./*[@style="font-weight:bold"]/div').get_attribute('data-highlightingkey')
+                matches.append({
+                    t1: '', 
+                    t2: '',
+                    'winner': winner
+                    })
+                teams.add(t1)
+                teams.add(t2)
+
+        else:
+            for item in res:
+                t1 = item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
+                t2 = item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
+                winner = item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
+                matches.append({
+                    t1: '', 
+                    t2: '',
+                    'winner': winner
+                    })
+                teams.add(t1)
+                teams.add(t2)
 
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
@@ -242,7 +257,7 @@ def serializeList(file_name, list):
 
 def main():
     
-    # getTournamentMatches('https://liquipedia.net/valorant/Golden_Goose/2')
+    # getTournamentMatches('https://liquipedia.net/valorant/VALORANT_Champions_Tour/2021/Champions')
    
 
     tournamentsWithInfo = {}
