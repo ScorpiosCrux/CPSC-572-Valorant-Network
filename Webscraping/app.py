@@ -453,17 +453,44 @@ def getTournamentMatches(tournament_link):
 
     try:
         res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
-        for item in res:
-            t1 = item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
-            t2 = item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
-            winner = item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
-            matches.append({
-                t1: '', 
-                t2: '',
-                'winner': winner
-                })
-            teams.add(t1)
-            teams.add(t2)
+    except NoSuchElementException as e:
+        print("\n Unable to locate page element. :( \n")
+
+    if res == []:
+        try:
+            res = driver.find_elements(By.CLASS_NAME, 'bracket-game')
+            for item in res:
+                try:
+                    t1 = item.find_element(By.CLASS_NAME,'bracket-team-top').get_attribute('data-highlightingkey')
+                    t2 = item.find_element(By.CLASS_NAME,'bracket-team-bottom').get_attribute('data-highlightingkey')
+                    winner = item.find_element(By.XPATH,'./*[@style="font-weight:bold"]/div').get_attribute('data-highlightingkey')
+                    matches.append({
+                        t1: '', 
+                        t2: '',
+                        'winner': winner
+                        })
+                    teams.add(t1)
+                    teams.add(t2)
+                except NoSuchElementException as e:
+                    print("\n Unable to locate page element in loop in case1. \n")
+        except NoSuchElementException as e:
+            print("\n Unable to locate page element in case1. \n")
+
+    else:
+        try:
+            for item in res:
+                t1 = item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
+                t2 = item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
+                winner = item.find_element(By.CLASS_NAME,'brkts-opponent-win').find_element(By.CLASS_NAME,'name.hidden-xs').text
+                matches.append({
+                    t1: '', 
+                    t2: '',
+                    'winner': winner
+                    })
+                teams.add(t1)
+                teams.add(t2)
+        except NoSuchElementException as e:
+            print("\n Unable to locate page element in case 2. \n")
 
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
@@ -482,8 +509,8 @@ def getTournamentMatches(tournament_link):
                 if team in match:
                     match[team]=team_members[team]
 
-    except NoSuchElementException as e:
-        print("\n Unable to locate page element. :( \n")
+    # except NoSuchElementException as e:
+    #     print("\n Unable to locate page element. :( \n")
 
     return matches
 
@@ -496,7 +523,11 @@ def getTournamentTeamMembers(url,team):
         
         if res==[]:
             res = driver.find_elements(By.XPATH, '//*[@title="'+team+'"]/parent::a/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
-
+        if res==[]:
+            res = driver.find_elements(By.XPATH, '//*[text()="'+team+'"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
+        if res==[]:
+            res = driver.find_elements(By.XPATH, '//*[@title="'+team+' (page does not exist)"]/parent::center/following-sibling::div[@class="teamcard-inner"]/table[@data-toggle-area-content="1"]/tbody/tr')
+         
         for item in res:
             # member = item.find_element(By.XPATH, './td/a').text
             elements = item.find_elements(By.XPATH, './td/a')
@@ -519,6 +550,9 @@ def getTournamentTeamMembers(url,team):
     #     pickle.dump(str(list), fp)
 
 def main():
+    
+    # getTournamentMatches('https://liquipedia.net/valorant/VCT/2022/Stage_1/Masters')
+   
 
     tournamentsWithInfo = {}
     
@@ -532,11 +566,11 @@ def main():
         participants = getTournamentParticipants(tournament_links[index])
         matches = getTournamentMatches(tournament_links[index])
         tournamentsWithInfo[name] = {'participants':participants, 'matches':matches}
-        serializeList('tournament_info_NEW',tournamentsWithInfo)
+        serializeList('tournament_info_partial',tournamentsWithInfo)
 
         index+=1
 
-    serializeList('tournament_info',tournamentsWithInfo)
+    serializeList('tournament_info_2.0',tournamentsWithInfo)
 
    
     time.sleep(3)
