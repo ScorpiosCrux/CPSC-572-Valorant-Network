@@ -117,8 +117,8 @@ def getPlayerID(nodes, name, id):
 
 
 
-def generateLinks(nodes, id):
-    tournament_data = importJSON("Webscraping/tournament-data/tournament_info_NEW")
+def generateTeamLinks(nodes, id):
+    tournament_data = importJSON("tournament_info_2.0")
     player_data = importJSON("Network-Construction/nodes.json")
     links = []
 
@@ -148,6 +148,60 @@ def generateLinks(nodes, id):
                             links.append(link)
                             print("Done!")
                         increment += 1
+
+    return links
+
+def generateMatchLinks(nodes, id):
+    tournament_data = importJSON("tournament_info_2.0")
+    player_data = importJSON("Network-Construction/nodes.json")
+    links = []
+    error_num = 0
+    success_num = 0
+
+    for tournament, data in tournament_data.items():
+        matches = data['matches']
+        if (len(matches) != 0):
+            for match in matches:
+
+                team_a = None
+                team_b = None
+
+                for key, team in match.items():
+                    if (key == 'winner'):
+                        continue
+                    
+                    if (team_a == None):
+                        team_a = team
+                        #print("team_a: " + str(team_a))
+                    else:
+                        team_b = team
+                        #print("team_b: " + str(team_b))
+
+
+                if (len(team_a) == 0 or len(team_b) == 0):
+                    error_num += 1
+                    print(str(error_num) + "Error!" + str(tournament))
+                    continue
+
+                # Make links
+                for player_a in team_a:
+                    for player_b in team_b:
+
+                        player_a = player_a.lower()
+                        player_b = player_b.lower()
+                        
+                        player_a_id, id = getPlayerID(nodes=nodes, name=player_a, id=id)
+                        player_b_id, id = getPlayerID(nodes=nodes, name=player_b, id=id)
+
+                        link = "{},{}".format(player_a_id, player_b_id)
+                        links.append(link)
+                        #print("Done!")
+
+                success_num += 1
+                #print("done")
+
+                    
+
 
     return links
 
@@ -184,7 +238,7 @@ def main():
     id, nodes = generateNodes(all_data)
     # exportJSON("nodes.json", nodes)
 
-    data = generateLinks(nodes, id)
+    data = generateMatchLinks(nodes, id)
 
     # exportJSON("nodes_all.json", nodes)
     # pandaCSV("out.csv", nodes)
