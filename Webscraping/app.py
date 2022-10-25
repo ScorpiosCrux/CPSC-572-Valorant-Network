@@ -171,21 +171,31 @@ def getTournamentMatches(tournament_link):
 
     try:
         res = driver.find_elements(By.CLASS_NAME, 'brkts-match')
-        if res == []:
+    except NoSuchElementException as e:
+        print("\n Unable to locate page element. :( \n")
+
+    if res == []:
+        try:
             res = driver.find_elements(By.CLASS_NAME, 'bracket-game')
             for item in res:
-                t1 = item.find_element(By.CLASS_NAME,'bracket-team-top').get_attribute('data-highlightingkey')
-                t2 = item.find_element(By.CLASS_NAME,'bracket-team-bottom').get_attribute('data-highlightingkey')
-                winner = item.find_element(By.XPATH,'./*[@style="font-weight:bold"]/div').get_attribute('data-highlightingkey')
-                matches.append({
-                    t1: '', 
-                    t2: '',
-                    'winner': winner
-                    })
-                teams.add(t1)
-                teams.add(t2)
+                try:
+                    t1 = item.find_element(By.CLASS_NAME,'bracket-team-top').get_attribute('data-highlightingkey')
+                    t2 = item.find_element(By.CLASS_NAME,'bracket-team-bottom').get_attribute('data-highlightingkey')
+                    winner = item.find_element(By.XPATH,'./*[@style="font-weight:bold"]/div').get_attribute('data-highlightingkey')
+                    matches.append({
+                        t1: '', 
+                        t2: '',
+                        'winner': winner
+                        })
+                    teams.add(t1)
+                    teams.add(t2)
+                except NoSuchElementException as e:
+                    print("\n Unable to locate page element in loop in case1. \n")
+        except NoSuchElementException as e:
+            print("\n Unable to locate page element in case1. \n")
 
-        else:
+    else:
+        try:
             for item in res:
                 t1 = item.find_element(By.CLASS_NAME, 'name.hidden-xs').text
                 t2 = item.find_element(By.XPATH, './div/following-sibling::div/div/div/span/following-sibling::span').text
@@ -197,6 +207,8 @@ def getTournamentMatches(tournament_link):
                     })
                 teams.add(t1)
                 teams.add(t2)
+        except NoSuchElementException as e:
+            print("\n Unable to locate page element in case 2. \n")
 
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
@@ -215,8 +227,8 @@ def getTournamentMatches(tournament_link):
                 if team in match:
                     match[team]=team_members[team]
 
-    except NoSuchElementException as e:
-        print("\n Unable to locate page element. :( \n")
+    # except NoSuchElementException as e:
+    #     print("\n Unable to locate page element. :( \n")
 
     return matches
 
@@ -257,7 +269,7 @@ def serializeList(file_name, list):
 
 def main():
     
-    # getTournamentMatches('https://liquipedia.net/valorant/VALORANT_Champions_Tour/2021/Champions')
+    # getTournamentMatches('https://liquipedia.net/valorant/VCT/2022/Stage_1/Masters')
    
 
     tournamentsWithInfo = {}
