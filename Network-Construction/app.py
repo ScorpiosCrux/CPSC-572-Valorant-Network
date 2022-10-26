@@ -186,9 +186,9 @@ def main():
 
     data = generateLinks(nodes, id)
 
-    exportJSON("nodes_all.json", nodes)
-    pandaCSV("out.csv", nodes)
-    writeFile("links.csv", data)
+    # exportJSON("nodes_all.json", nodes)
+    # pandaCSV("out.csv", nodes)
+    # writeFile("links.csv", data)
 
     print("Done")
 
