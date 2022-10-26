@@ -210,22 +210,22 @@ def getTournamentMatches(tournament_link):
         except NoSuchElementException as e:
             print("\n Unable to locate page element in case 2. \n")
 
-        wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
-        res = driver.find_element(By.XPATH, '//button[text()="Show Players"]')
-        driver.execute_script("arguments[0].click();", res)
+    wait = WebDriverWait(driver, 1)
+    element = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[text()="Show Players"]')))
+    res = driver.find_element(By.XPATH, '//button[text()="Show Players"]')
+    driver.execute_script("arguments[0].click();", res)
 
-        team_info={}
-        for team in teams:
-            url = tournament_link
-            members = getTournamentTeamMembers(url, team)
-            team_members[team]=members
+    team_info={}
+    for team in teams:
+        url = tournament_link
+        members = getTournamentTeamMembers(url, team)
+        team_members[team]=members
 
-        
-        for match in matches:
-            for team in team_members:
-                if team in match:
-                    match[team]=team_members[team]
+
+    for match in matches:
+        for team in team_members:
+            if team in match:
+                match[team]=team_members[team]
 
     # except NoSuchElementException as e:
     #     print("\n Unable to locate page element. :( \n")
@@ -270,7 +270,7 @@ def serializeList(file_name, list):
 def main():
     
     # getTournamentMatches('https://liquipedia.net/valorant/VCT/2022/Stage_1/Masters')
-   
+  
 
     tournamentsWithInfo = {}
     
