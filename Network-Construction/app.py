@@ -152,7 +152,7 @@ def generateTeamLinks(nodes, id):
     return links
 
 def generateMatchLinks(nodes, id):
-    tournament_data = importJSON("tournament_info_2.0")
+    tournament_data = importJSON("Data/Main-Data/tournament_info_2.0")
     player_data = importJSON("Network-Construction/nodes.json")
     links = []
     error_num = 0
@@ -238,7 +238,25 @@ def main():
     id, nodes = generateNodes(all_data)
     # exportJSON("nodes.json", nodes)
 
-    data = generateMatchLinks(nodes, id)
+    links = generateMatchLinks(nodes, id)
+    
+    weights = {}
+    for link in links:
+        if (link in weights):
+            weights[link] += 1
+        else:
+            weights[link] = 1
+        print("Done")
+    
+    #https://stackoverflow.com/questions/4183506/python-list-sort-in-descending-order
+    sorted_weights = {k: v for k, v in sorted(weights.items(), key=lambda item: item[1], reverse=True)}
+
+    # Write the file to Data/Main-Data/links.csv
+    with open("Data/Main-Data/links.csv", "w") as f:
+        f.write("Source,Target,Weight\n")
+        for item in sorted_weights:
+            f.write(item + "," + str(weights[item]) + '\n')
+
 
     # exportJSON("nodes_all.json", nodes)
     # pandaCSV("out.csv", nodes)
