@@ -1,3 +1,5 @@
+#Credit to course notes for start code
+
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -17,11 +19,11 @@ mpl.rc('axes', linewidth=1, edgecolor="#222222", labelcolor="#222222")
 mpl.rc('text', usetex=False, color="#222222")
 
 def main():
-    f = open('nodes_all.json')
-    nodes = json.load(f)
-    f.close()
+    # f = open('nodes_all.json')
+    # nodes = json.load(f)
+    # f.close()
 
-    G = nx.Graph()
+    # G = nx.Graph()
     # # adding nodes from dictionary
     # G.add_nodes_from(nodes.keys())
 
@@ -40,11 +42,12 @@ def main():
     #     playerD["winnings"]=nodes[key]["winnings"]
 
     # print("ID: ", G.nodes["10x"]["id"]," pro matches: ",G.nodes["10x"]["pro-matches"])
+
     links = open('links.csv', "r")
     next(links, None)  # skip the first line in the input file
 
     #reading in edge list
-    G = nx.parse_edgelist(links, 
+    G = nx.read_weighted_edgelist(links, 
                         delimiter=',', 
                         create_using=nx.Graph(),
                         nodetype=int)
@@ -76,34 +79,30 @@ def main():
     print("Minimum degree: ", kmin)
     print("Maximum degree: ", kmax)
 
+
+    # list down all the connected components
+    # print("Connected Components: ")
+    # print(list(nx.connected_components(G)))
+
+    print("Number of Components: ", nx.number_connected_components(G))
+
+    #Calculates average shortest path for each of the components
+    #https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.shortest_paths.generic.average_shortest_path_length.html
+    for C in (G.subgraph(c).copy() for c in nx.connected_components(G)):
+        
+        averageSPL = nx.average_shortest_path_length(C, weight = True)
+        print("Average Shortest Path Length: ", averageSPL)
+        # pairs = nx.pair
+        # print("Standard Deviation: ", np.std(averageSPL))
+        averageCustering = (nx.average_clustering(C, weight = True))
+        print("Average Clustering Co-efficient: ", averageCustering)
+
+
     # # Get 10 logarithmically spaced bins between kmin and kmax
-    # bin_edges = np.logspace(np.log10(kmin), np.log10(kmax), num=10)
-
-    # # histogram the data into these bins
-    # density, _ = np.histogram(degrees, bins=bin_edges, density=True)
-
-    # fig = plt.figure(figsize=(6,4))
-
-    # # "x" should be midpoint (IN LOG SPACE) of each bin
-    # log_be = np.log10(bin_edges)
-    # x = 10**((log_be[1:] + log_be[:-1])/2)
-
-    # plt.loglog(x, density, marker='o', linestyle='none')
-    # plt.xlabel(r"degree $k$", fontsize=16)
-    # plt.ylabel(r"$P(k)$", fontsize=16)
-
-    # # remove right and top boundaries because they're ugly
-    # ax = plt.gca()
-    # ax.spines['right'].set_visible(False)
-    # ax.spines['top'].set_visible(False)
-    # ax.yaxis.set_ticks_position('left')
-    # ax.xaxis.set_ticks_position('bottom')
-    
-    # # Show the plot
-    # plt.show()
+    bin_edges = np.logspace(np.log10(kmin), np.log10(kmax), num=10)
 
     # Get 20 logarithmically spaced bins between kmin and kmax
-    bin_edges = np.linspace(kmin, kmax, num=10)
+    # bin_edges = np.linspace(kmin, kmax, num=10)
 
     # histogram the data into these bins
     density, _ = np.histogram(degrees, bins=bin_edges, density=True)
@@ -114,7 +113,8 @@ def main():
     log_be = np.log10(bin_edges)
     x = 10**((log_be[1:] + log_be[:-1])/2)
 
-    plt.plot(x, density, marker='o', linestyle='none')
+    plt.loglog(x, density, marker='o', linestyle='none')
+    # plt.plot(x,density, marker='o', linestyle='none')
     plt.xlabel(r"degree $k$", fontsize=16)
     plt.ylabel(r"$P(k)$", fontsize=16)
 
@@ -124,6 +124,12 @@ def main():
     ax.spines['top'].set_visible(False)
     ax.yaxis.set_ticks_position('left')
     ax.xaxis.set_ticks_position('bottom')
+
+    a = np.asarray(x, dtype=float)
+    b = np.asarray(density, dtype=float)
+
+    logA = np.log10(a)
+    logB = np.log10(b)
 
     # Show the plot
     plt.show()
