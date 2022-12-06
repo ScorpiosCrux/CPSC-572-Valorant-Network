@@ -4,6 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
+import seaborn as sns
 
 # change defaults to be less ugly
 # Code for this section is from networkx-W3L5
@@ -69,29 +70,64 @@ def clustering_coefficient(G):
         print(averageCustering)
 
 
-#Calculates various types of centrality and prints them
+#Calculates the degree centrality and graphs it in relation to win rate
 def calc_centrality(G):
-    data = pd.read_csv('out.csv')
+    # loading in the nodes with attributes
+    data = pd.read_csv("out.csv")
     df = pd.DataFrame(data)
 
-    print()
-    print("Centrality Calculations:")
+    # getting rid of irrelevant columns
+    df = df.drop(columns=["username", "age", "status", "nationality", "pro-matches", "pro-matches-won", "pro-matches-lost", "winnings"])
 
+    # calculating the centrality
     degree_cent = nx.degree_centrality(G)
-    print("Degree Centrality: ", degree_cent)
-    betweeness_cent = nx.betweenness_centrality(G)
-    print("Betweeness Centrality: ", betweeness_cent)
-    closeness_cent = nx.closeness_centrality(G)
-    print("Closeness Centrality: ", closeness_cent)
+
+    # adding a column for degree centrality and filling it with "NA"
+    df["degree centrality"] = "NA"
+
+    # adding the degree centralities to the proper players 
+    for key in degree_cent:
+        df.loc[df[df["id"] == key].index,"degree centrality"]=degree_cent.get(key)
+    
+    #dropping rows without a degree centrality 
+    df = df.drop(df[df["degree centrality"] == "NA"].index)
+
+    #dropping players who have not participated in a tournament
+    df = df.drop(df[df["tournaments"] <= 0].index)
+
+    # getting rid of irrelevant columns
+    df = df.drop(columns=["id", "tournaments"])
+
+    # rounding the winrate to two decimal places so they can be effectively grouped and averaged
+    df["pro-matches-winrate"] = df["pro-matches-winrate"].round(2)
+    groupedByWinrate = df.groupby(['pro-matches-winrate']).mean()
+
+    #plotting the correlation between degree centrality and win rate
+    ax = sns.scatterplot(x=groupedByWinrate['degree centrality'], y = groupedByWinrate.index)
+    ax.set(
+        xlabel = 'Degree Centrality',
+        ylabel = 'Win Rate',
+        title = 'Correlation Between Degree Centrality and Win Rate'
+    )
+
+    #find line of best fit
+    x = groupedByWinrate['degree centrality']
+    y = groupedByWinrate.index
+    a, b = np.polyfit(x, y, 1)
+    #add line of best fit to plot
+    plt.plot(x, a*x+b, color= "red")
+
+    plt.show()
 
 def main():
-    links = open('links.csv', "r")
+    links = open("links.csv", "r")
     next(links, None)  # skip the first line in the input file
 
     #reading in edge list
     G = nx.read_weighted_edgelist(links, delimiter=',', create_using=nx.Graph(), nodetype=int)
 
     #calculating the # nodes, # links, average degree, minimum degree, and maximum degree
+    # Code for this section is from networkx-W3L5
     N = len(G)
     L = G.size()
     degrees = [G.degree(node) for node in G]
@@ -107,13 +143,13 @@ def main():
     print("Minimum degree: ", kmin)
     print("Maximum degree: ", kmax)
     
-    deg_dist(degrees, kmin, kmax)
+    # deg_dist(degrees, kmin, kmax)
     
     print()
     print("Number of Components: ", nx.number_connected_components(G))
     
-    # shortest_path(G)
-    # clustering_coefficient(G)
+    shortest_path(G)
+    clustering_coefficient(G)
     calc_centrality(G)
 
 main()
