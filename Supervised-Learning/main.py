@@ -1,3 +1,5 @@
+# Originally purposed for CPSC 501 A2, but adapted to the project.
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -44,6 +46,8 @@ def main():
 
     sns.set(rc={"figure.figsize":(15, 8.5)}) 
 
+
+    # Create some plots
     plot_order = df.sort_values("age")
     dis_plot = sns.histplot(data=plot_order, x="age")
     dis_plot.figure.savefig("Main/plot1.jpg") 
